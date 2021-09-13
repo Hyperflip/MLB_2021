@@ -51,6 +51,8 @@ import numpy as np
 import pandas as pd
 from util import delimiter_fix, plot_outliers
 from scipy.stats import norm
+from sklearn.impute import KNNImputer
+from sklearn.datasets import load_wine
 
 if __name__ == '__main__':
     # set pandas options to make sure you see all info when printing dfs
@@ -109,12 +111,22 @@ if __name__ == '__main__':
     # total_phenols
     phenols_vals = [float(string) for string in data.loc[:, 'total_phenols']]
     # plot
-    plot_outliers(phenols_vals)
+    #plot_outliers(phenols_vals)
     # remove outliers at cutoff point 0.025%
     mu, std = norm.fit(phenols_vals)
     ppf = norm.ppf(1 - 0.00025, mu, std)
     for i, val in enumerate(data.loc[:, 'total_phenols']):
         if float(val) > ppf:
             data.loc[i, 'total_phenols'] = np.NAN
+
+    # impute missing values
+    col_names = ['alcohol', 'malic_acid', 'ash', 'alcalinity_of_ash', 'magnesium', 'total_phenols', 'flavanoids', 'nonflavanoid_phenols', 'proanthocyanins', 'color_intensity', 'hue', 'od280/od315_of_diluted_wines', 'proline']
+    # create dataframe from sklearn wine dataset
+    data_sklearn = pd.DataFrame(load_wine()['data'], columns=col_names)
+    # fit imputer on sklearn data, then transform data
+    imputer = KNNImputer(n_neighbors=2)
+    imputer.fit(data_sklearn)
+    data.iloc[:, :-5] = imputer.transform(data.iloc[:, :-5])
+
 
     print(data)
