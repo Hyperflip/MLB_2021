@@ -47,11 +47,10 @@ the dataset includes all kinds of errors
 ########################################################################################################################
 # Solution
 ########################################################################################################################
-import numpy
+import numpy as np
 import pandas as pd
-from util import delimiter_fix
+from util import delimiter_fix, plot_outliers
 from scipy.stats import norm
-import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     # set pandas options to make sure you see all info when printing dfs
@@ -60,7 +59,7 @@ if __name__ == '__main__':
     pd.set_option('display.width', None)
     pd.set_option('display.max_colwidth', None)
 
-    missing_types = [numpy.NAN, 'missing', -999]
+    missing_types = [np.NAN, 'missing', -999]
 
     # load file and correct delimiters ... delimiter_fix() fixes all faulty lines but one (off by 1 entry)
     file = delimiter_fix('data/wine_exercise.csv')
@@ -69,7 +68,7 @@ if __name__ == '__main__':
     data = pd.read_csv(file, delimiter=';', error_bad_lines=False, skiprows=1, skipfooter=1)
 
     # consistently encode NA values (to numpy NaN)
-    data = data.replace(missing_types, numpy.NAN)
+    data = data.replace(missing_types, np.NAN)
 
     # fix and encode values in col 'season' (SPRING => 0, etc.)
     data = data.replace(
@@ -90,18 +89,32 @@ if __name__ == '__main__':
 
     # remove outliers
     # proline
-    data.loc[:, 'proline'] = data.loc[:, 'proline'].replace(to_replace=0, value=numpy.NAN)
+    data.loc[:, 'proline'] = data.loc[:, 'proline'].replace(to_replace=0, value=np.NAN)
 
     # fix magnesium and total_phenols in row 165 by hand to be able to continue
     data.iloc[165, 4] = 111
     data.iloc[165, 5] = 1.7
 
     # magnesium
-    magnesium_vals = [int(string) for string in data.loc[:, 'magnesium']]
-    norm(magnesium_vals)
-    mean = norm.mean()
-    print(mean)
-    pdf = norm.pdf(magnesium_vals, mean, 1)
-    print(pdf)
+    magnesium_vals = [float(string) for string in data.loc[:, 'magnesium']]
+    # plot
+    #plot_outliers(magnesium_vals)
+    # remove outliers at cutoff point 0.025%
+    mu, std = norm.fit(magnesium_vals)
+    ppf = norm.ppf(1 - 0.00025, mu, std)
+    for i, val in enumerate(data.loc[:, 'magnesium']):
+        if float(val) > ppf:
+            data.loc[i, 'magnesium'] = np.NAN
 
-    # print(data)
+    # total_phenols
+    phenols_vals = [float(string) for string in data.loc[:, 'total_phenols']]
+    # plot
+    plot_outliers(phenols_vals)
+    # remove outliers at cutoff point 0.025%
+    mu, std = norm.fit(phenols_vals)
+    ppf = norm.ppf(1 - 0.00025, mu, std)
+    for i, val in enumerate(data.loc[:, 'total_phenols']):
+        if float(val) > ppf:
+            data.loc[i, 'total_phenols'] = np.NAN
+
+    print(data)

@@ -1,5 +1,8 @@
 import re
 from io import StringIO
+from scipy.stats import norm
+import matplotlib.pyplot as plt
+import numpy as np
 
 missing_strings = ['nan', 'missing', '-999']
 # find and replace ',' intended as '.' per col
@@ -50,3 +53,14 @@ def delimiter_fix(path):
                 line = fixed_lines[broken_index][:-1] + line[replace_end:]
             replaced += line
     return StringIO(replaced)
+
+def plot_outliers(values):
+    mu, std = norm.fit(values)
+    # Plot the histogram.
+    plt.hist(values, bins=25, density=True, alpha=0.6, color='g')
+    # Plot the PDF.
+    xmin, xmax = plt.xlim()
+    x = np.linspace(xmin, xmax, 100)
+    p = norm.pdf(x, mu, std)
+    plt.plot(x, p, 'k', linewidth=2)
+    plt.show()
