@@ -46,11 +46,9 @@ class MySmote:
             # pick random from closest samples
             rand_closest = closest_samples[random.randint(0, self.k - 1)][1]
 
-            # from 100 x and y values between the sample and random neighbour, calculate normal distribution
-            x_values = np.linspace(rand_sample[0], rand_closest[0], 100)
-            y_values = np.linspace(rand_sample[1], rand_closest[1], 100)
-            mu_x, std_x = stats.norm.fit(x_values)
-            mu_y, std_y = stats.norm.fit(y_values)
+            # get parameters for normal distribution
+            mu_x, std_x = stats.norm.fit([rand_sample[0], rand_closest[0]])
+            mu_y, std_y = stats.norm.fit([rand_sample[1], rand_closest[1]])
             # choose random x and y values for new sample from normal distribution
             new_x = np.random.normal(mu_x, std_x)
             new_y = np.random.normal(mu_y, std_y)
