@@ -1,6 +1,6 @@
 import pandas as pd
 from util import min_max_norm, get_folds
-from myKNN import myKNNClassifier
+from MyKNN import myKNNClassifier
 from sklearn.neighbors import KNeighborsClassifier
 
 if __name__ == '__main__':

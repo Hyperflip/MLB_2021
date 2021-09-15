@@ -1,7 +1,7 @@
 import pandas as pd
 import math as mt
 from util import min_max_norm, get_folds
-from myKNN import myKNNClassifier
+from MyKNN import myKNNClassifier
 from sklearn.neighbors import KNeighborsRegressor
 
 if __name__ == '__main__':

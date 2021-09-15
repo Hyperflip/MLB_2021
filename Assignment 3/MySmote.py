@@ -17,7 +17,7 @@ class MySmote:
     def __init__(self, k):
         self.k = k
 
-    def fit_transform(self, X, y):
+    def fit_resample(self, X, y):
         c = Counter(y)
         min_key, min_count = min(c.items(), key=itemgetter(1))
         _, max_count = max(c.items(), key=itemgetter(1))
@@ -27,10 +27,10 @@ class MySmote:
         self.minority_class = min_key
         self.majority_count = max_count
 
-        self._transform()
+        self._resample()
         return self.X, self.y
 
-    def _transform(self):
+    def _resample(self):
         for i in range(0, self.majority_count - len(self.X_minor)):
             # get random sample
             rand_sample = self.X_minor[random.randint(0, len(self.X_minor) - 1)]
@@ -47,11 +47,11 @@ class MySmote:
             rand_closest = closest_samples[random.randint(0, self.k - 1)][1]
 
             # get parameters for normal distribution
-            mu_x, std_x = stats.norm.fit([rand_sample[0], rand_closest[0]])
-            mu_y, std_y = stats.norm.fit([rand_sample[1], rand_closest[1]])
+            mu_x, sigma_x = stats.norm.fit([rand_sample[0], rand_closest[0]])
+            mu_y, sigma_y = stats.norm.fit([rand_sample[1], rand_closest[1]])
             # choose random x and y values for new sample from normal distribution
-            new_x = np.random.normal(mu_x, std_x)
-            new_y = np.random.normal(mu_y, std_y)
+            new_x = np.random.normal(mu_x, sigma_x)
+            new_y = np.random.normal(mu_y, sigma_y)
 
             # append new sample to minority
             new_sample = np.array([new_x, new_y])
