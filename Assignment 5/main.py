@@ -16,11 +16,11 @@ if __name__ == '__main__':
     f_x = k * x + d
     plt.plot(x, f_x, '-r')
     plt.scatter(X, y)
-    #plt.show()
+    plt.show()
 
     # plot histogram
     plt.hist(X, bins=10)
-    #plt.show()
+    plt.show()
 
     # calculate MSE and R2
     n = len(X)

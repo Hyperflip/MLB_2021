@@ -8,7 +8,7 @@ if __name__ == '__main__':
     iris = load_iris()
     data = pd.DataFrame(data=np.c_[iris['data'], iris['target']],
                         columns=iris['feature_names'] + ['target'])
-    X = data[:-1]
+    X = data.iloc[:, :-1]
 
     # plot normal distribution before standardization
     sepal_lengths = data.iloc[:, 0]
