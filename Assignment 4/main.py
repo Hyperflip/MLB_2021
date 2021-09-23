@@ -3,6 +3,25 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+def predict(data, root, sample):
+    split = root[0]
+    col = split[0]
+    pivot = split[1]
+    confidences = root[1]
+    confidences_smaller = confidences[0]
+    confidences_larger = confidences[1]
+
+    predicted_confidences = ()
+    if sample[col] <= pivot:
+        predicted_confidences = confidences_smaller
+    else:
+        predicted_confidences = confidences_larger
+
+    prediction = predicted_confidences.index(max(predicted_confidences))
+    confidence = max(predicted_confidences)
+
+    print('the sample of class', int(sample['target']), 'belongs to class', prediction, 'with confidence', confidence)
+
 
 def calc_gini(data, col, values):
     # count target occurences
@@ -17,20 +36,21 @@ def calc_gini(data, col, values):
                 counts[1] += 1
     total = counts[0] + counts[1]
     gini = 1 - (counts[0] / total) ** 2 - (counts[1] / total) ** 2
-    return gini, total
+    confidences = (counts[0] / total, counts[1] / total)
+    return gini, total, confidences
 
 
 def calc_gini_total(data, col, pivot):
     values_smaller = data[data[col] <= pivot][col]
     values_larger = data[data[col] > pivot][col]
 
-    gini_smaller, total_smaller = calc_gini(data, col, values_smaller)
-    gini_larger, total_larger = calc_gini(data, col, values_larger)
+    gini_smaller, total_smaller, confidences_smaller = calc_gini(data, col, values_smaller)
+    gini_larger, total_larger, confidences_larger = calc_gini(data, col, values_larger)
 
     total_total = total_smaller + total_larger
     gini_total = gini_smaller * (total_smaller / total_total) + gini_larger * (total_larger / total_total)
 
-    return gini_total, (col, pivot)
+    return (col, pivot, gini_total), (confidences_smaller, confidences_larger)
 
 
 if __name__ == '__main__':
@@ -53,6 +73,8 @@ if __name__ == '__main__':
     for split in potential_splits:
         ginis.append(calc_gini_total(data, split[0], split[1]))
 
-    gini, split = min(ginis, key=lambda x: x[0])
+    split, confidences = min(ginis, key=lambda x: x[0][2])
 
-    print('best split at', split[1], 'of column', split[0], 'with gini index of', gini)
+    print('best split at', split[1], 'of column', split[0], 'with gini index of', split[2])
+
+    predict(data, (split, confidences), data.iloc[4])
