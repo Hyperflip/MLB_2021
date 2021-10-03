@@ -3,7 +3,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.datasets import make_classification
 import random
-from util import nearest_cluster, plot_clusters, is_centroid
+from util import nearest_cluster, plot_clusters, distance_euclid
 
 
 class Cluster:
@@ -14,23 +14,8 @@ class Cluster:
     def update_centroid(self):
         if len(self.members) == 0:
             return
-
-        x_values = list(map(lambda x: x[0], self.members))
-        y_values = list(map(lambda x: x[1], self.members))
-
-        new_x = 0
-        for x in x_values:
-            new_x += x
-        new_x = new_x / len(x_values)
-
-        new_y = 0
-        for y in y_values:
-            new_y += y
-        new_y = new_y / len(y_values)
-
-        centroid_new = np.array([new_x, new_y])
-
-        self.centroid = centroid_new
+        self.centroid = np.mean(self.members, axis=0)
+        return self.centroid
 
     def clear_members(self):
         self.members = []
@@ -54,17 +39,13 @@ def k_means(data, k, max_iter):
 
         plot_clusters(clusters)
 
-        # update centroids and clear members
-        convergence = True
-        for cluster in clusters:
-            centroid_old = cluster.centroid
-            cluster.update_centroid()
-            if not np.array_equal(centroid_old, cluster.centroid):
-                convergence = False
-            cluster.clear_members()
-
-        if convergence:
+        # check for convergence while also updating centroids
+        if all(list(distance_euclid(cluster.centroid, cluster.update_centroid(), 2) < 0.1 for cluster in clusters)):
+            print('breaking due to convergence')
             break
+
+        # clear members for next iteration
+        map(lambda x: x.clear_members(), clusters)
 
 
 if __name__ == '__main__':
@@ -72,10 +53,6 @@ if __name__ == '__main__':
                                n_clusters_per_class=2, n_samples=100)
     data = pd.DataFrame(data=X, columns=['X1', 'X2'])
 
-    plt.scatter(data['X1'], data['X2'], marker='o',
-                s=25, edgecolor='k')
-    #plt.show()
-
     k = 3
-    max_iter = 8
+    max_iter = 10
     k_means(data, k, max_iter)

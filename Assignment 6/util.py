@@ -37,22 +37,15 @@ def plot_clusters(clusters):
     for i, cluster in enumerate(clusters):
         plt.scatter(cluster.centroid[0],
                     cluster.centroid[1],
-                    c='r',
-                    marker='o',
-                    s=50,
-                    edgecolor='k',
-                    zorder=1)
+                    c='r', marker='o', s=50,
+                    edgecolor='k', zorder=1)
         for member in cluster.members:
             X1.append(member[0])
             X2.append(member[1])
             cluster_indices.append(i)
 
-    plt.scatter(X1,
-                X2,
-                c=cluster_indices,
-                marker='o',
-                s=25,
-                edgecolor='k',
-                zorder=0)
+    plt.scatter(X1, X2, c=cluster_indices,
+                marker='o', s=25,
+                edgecolor='k', zorder=0)
 
     plt.show()
